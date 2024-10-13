@@ -5,11 +5,14 @@ const path = require("node:path");
 const constants = require("./constants.bot");
 const { TOKEN } = process.env;
 
-const intents = [
+let intents = [
   discord.GatewayIntentBits.Guilds,
   discord.GatewayIntentBits.GuildMessages,
   discord.GatewayIntentBits.MessageContent,
-];
+]
+if (constants.intents !== undefined && typeof constants.intents.map === "function" && constants.intents.length > 0) {intents = constants.intents}
+else console.log("No intents given, using default");
+
 const client = new discord.Client({ intents });
 
 const events = [];
@@ -21,7 +24,7 @@ client.on("ready", async (cl) => {
   cl.guilds.cache.forEach((guild) => {
     console.log("Logged in\x1b[1m", guild.name, "\x1b[0m");
   });
-  if (constants.status !== undefined) cl.user.setActivity(constants.status);
+  if (constants.status !== undefined && typeof constants.status === "object") cl.user.setActivity(constants.status);
   //Load commands
   await cl.application.commands.set([]);
   if (!fs.existsSync("commands/") || fs.readdirSync("commands/").length === 0) {
