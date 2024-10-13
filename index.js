@@ -178,10 +178,11 @@ client.on("ready", async (cl) => {
       }
     }
   }
+  for (const runScript of scripts) {
+    runScript();
+  }
 });
-for (const runScript of scripts) {
-  runScript();
-}
+
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.type === interaction.isChatInputCommand()) return;
 
