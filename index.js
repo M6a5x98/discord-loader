@@ -106,12 +106,12 @@ client.on("ready", async (cl) => {
   //#endregion
   //#region Commands
   await cl.application.commands.set([]);
-  if (!fs.existsSync("commands/") || fs.readdirSync("commands/").length === 0) {
+  if (!fs.existsSync("plugins/") || fs.readdirSync("plugins/").length === 0) {
     console.log("\x1b[31;1mThe bot cannot start without plugins\x1b[0m");
     process.exit(1);
   }
   const fls = fs
-    .readdirSync("commands", { withFileTypes: true })
+    .readdirSync("plugins", { withFileTypes: true })
     .filter((e) => e.isDirectory());
   const slhcmdrgt = new SlashCommandRegisterer(cl);
   for (const dir of fls) {
