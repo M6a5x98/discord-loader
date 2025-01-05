@@ -2,11 +2,15 @@
 > [!WARNING]
 > To start the loader, `Node.JS` and `NPM` must be installed.
 
-Go in the directiry where the program is and type : 
+Go in the directory where the program is and type : 
 ```bash
 npm install
 ```
  ## Starting
+ Create a `.env` file with the following content :
+ ```properties
+TOKEN=<Your_Bot_Token>
+```
  Then type :
  ```bash
 node .
