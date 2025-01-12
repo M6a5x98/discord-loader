@@ -153,12 +153,12 @@ client.on("ready", async (cl) => {
             //#region load_/_commands
             if (type === "command") {
               if (
-                !fs.existsSync(path.join("commands", file.name, file.main[i]))
+                !fs.existsSync(path.join("plugins", file.name, file.main[i]))
               )
                 continue;
               const file2 = require(path.join(
                 __dirname,
-                "commands",
+                "plugins",
                 file.name,
                 file.main[i]
               ));
@@ -188,12 +188,12 @@ client.on("ready", async (cl) => {
             } else if (type === "event") {
               //#region load_events
               if (
-                !fs.existsSync(path.join("commands", file.name, file.main[i]))
+                !fs.existsSync(path.join("plugins", file.name, file.main[i]))
               )
                 continue;
               const file2 = require(path.join(
                 __dirname,
-                "commands",
+                "plugins",
                 file.name,
                 file.main[i]
               ));
@@ -208,12 +208,12 @@ client.on("ready", async (cl) => {
             } else if (type === "script") {
               //#region load_scripts
               if (
-                !fs.existsSync(path.join("commands", file.name, file.main[i]))
+                !fs.existsSync(path.join("plugins", file.name, file.main[i]))
               )
                 continue;
               const file2 = require(path.join(
                 __dirname,
-                "commands",
+                "plugins",
                 file.name,
                 file.main[i]
               ));
