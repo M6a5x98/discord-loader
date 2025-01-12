@@ -1,9 +1,10 @@
 const discord = require("discord.js");
 require("dotenv").config();
+const { TOKEN } = process.env;
 const fs = require("node:fs");
 const path = require("node:path");
 const constants = require("./constants.bot");
-const { TOKEN } = process.env;
+const getEventGuild = require("./getEventGuild");
 
 let intents = [
   discord.GatewayIntentBits.Guilds,
@@ -48,8 +49,6 @@ client.on("ready", async (cl) => {
         command[key] === undefined ? delete command[key] : {}
       );
       this.commands.push({ data: command, details: { scope: "*" } });
-      // this.commands[this.i].data = command;
-      // this.commands[this.i].details.scope = "*";
     }
     /**
      *
@@ -106,7 +105,12 @@ client.on("ready", async (cl) => {
   //#endregion
   //#region Commands
   await cl.application.commands.set([]);
-  if (!fs.existsSync("plugins/") || fs.readdirSync("plugins/").length === 0) {
+  if (
+    !fs.existsSync("plugins/") ||
+    fs
+      .readdirSync("plugins", { withFileTypes: true })
+      .filter((e) => e.isDirectory()).length === 0
+  ) {
     console.log("\x1b[31;1mThe bot cannot start without plugins\x1b[0m");
     process.exit(1);
   }
@@ -119,8 +123,12 @@ client.on("ready", async (cl) => {
     if (!fs.existsSync(path.join(dir.parentPath, dir.name, "plugin.json")))
       continue;
     const file = JSON.parse(
-      fs.readFileSync(path.join(dir.parentPath, dir.name, "plugin.json"))
+      fs.readFileSync(
+        path.join(dir.parentPath, dir.name, "plugin.json"),
+        "utf-8"
+      )
     );
+    if (file.dev) continue;
     if (
       file.main === undefined ||
       file.type === undefined ||
@@ -133,7 +141,7 @@ client.on("ready", async (cl) => {
     //#endregion
     else {
       //#region Multicommands
-      if (typeof file.type !== "number" && typeof file.main === "object") {
+      if (typeof file.type !== "string" && typeof file.main === "object") {
         if (
           file.type.length !== Object.keys(file.main).length &&
           file.type.length > 3 &&
@@ -143,20 +151,19 @@ client.on("ready", async (cl) => {
         else {
           for (const type of file.type) {
             //#region load_/_commands
-            if (type === 0) {
+            if (type === "command") {
               if (
                 !fs.existsSync(
-                  path.join("commands", file.name, file.main["command"])
+                  path.join("plugins", file.name, file.main["command"])
                 )
               )
                 continue;
               const file2 = require(path.join(
                 __dirname,
-                "commands",
+                "plugins",
                 file.name,
                 file.main["command"]
               ));
-              // await cl.application.commands.create(file2.data);
               const scope = fs
                 .readdirSync("config/")
                 .filter((e) => e.endsWith(".json"))
@@ -180,21 +187,21 @@ client.on("ready", async (cl) => {
               );
               continue;
               //#endregion
-            } else if (type === 1) {
+            } else if (type === "event") {
               //#region load_events
               if (
                 !fs.existsSync(
-                  path.join("commands", file.name, file.main["event"])
+                  path.join("plugins", file.name, file.main["event"])
                 )
               )
                 continue;
               const file2 = require(path.join(
                 __dirname,
-                "commands",
+                "plugins",
                 file.name,
                 file.main["event"]
               ));
-              events.push(file2);
+              events.push({ ...file2, from: file.name });
               console.log(
                 "Loading one event :\x1b[31;1m",
                 file.main["event"],
@@ -202,21 +209,21 @@ client.on("ready", async (cl) => {
               );
               continue;
               //#endregion
-            } else if (type === 2) {
+            } else if (type === "script") {
               //#region load_scripts
               if (
                 !fs.existsSync(
-                  path.join("commands", file.name, file.main["script"])
+                  path.join("plugins", file.name, file.main["script"])
                 )
               )
                 continue;
               const file2 = require(path.join(
                 __dirname,
-                "commands",
+                "plugins",
                 file.name,
                 file.main["script"]
               ));
-              scripts.push(file2);
+              scripts.push({ runScript: file2, plugin: file.name });
               console.log(
                 "Loading one script :\x1b[31;1m",
                 file.main["script"],
@@ -230,22 +237,22 @@ client.on("ready", async (cl) => {
         //#endregion
         //#region Singlecommands
       } else if (
-        typeof file.type === "number" &&
+        typeof file.type === "string" &&
         typeof file.main === "string"
       ) {
         let file2;
         switch (file.type) {
           //#region load_/_commands
-          case 0:
-            if (!fs.existsSync(path.join("commands", file.name, file.main)))
+          case "command":
+            if (!fs.existsSync(path.join("plugins", file.name, file.main)))
               continue;
             file2 = require(path.join(
               __dirname,
-              "commands",
+              "plugins",
               file.name,
               file.main
             ));
-            // await cl.application.commands.create(file2.data);
+
             const scope = fs
               .readdirSync("config/")
               .filter((e) => e.endsWith(".json"))
@@ -272,31 +279,31 @@ client.on("ready", async (cl) => {
             );
             continue;
           //#endregion
-          case 1:
+          case "event":
             //#region load_events
-            if (!fs.existsSync(path.join("commands", file.name, file.main)))
+            if (!fs.existsSync(path.join("plugins", file.name, file.main)))
               continue;
             file2 = require(path.join(
               __dirname,
-              "commands",
+              "plugins",
               file.name,
               file.main
             ));
-            events.push(file2);
+            events.push({ ...file2, from: file.name });
             console.log("Loading one event :\x1b[31;1m", file.main, "\x1b[0m");
             continue;
           //#endregion
-          case 2:
+          case "script":
             //#region load_scripts
-            if (!fs.existsSync(path.join("commands", file.name, file.main)))
+            if (!fs.existsSync(path.join("plugins", file.name, file.main)))
               continue;
             file2 = require(path.join(
               __dirname,
-              "commands",
+              "plugins",
               file.name,
               file.main
             ));
-            scripts.push(file2);
+            scripts.push({ runScript: file2, plugin: file.name });
             console.log("Loading one script :\x1b[31;1m", file.main, "\x1b[0m");
             continue;
           //#endregion
@@ -309,10 +316,38 @@ client.on("ready", async (cl) => {
   }
   await slhcmdrgt.register();
   //#endregion
+  for (const { runScript, plugin } of scripts) {
+    const guilds = [];
+    (await cl.guilds.fetch()).map((e) => e.fetch().then((f) => guilds.push(f)));
+    runScript(
+      cl,
+      guilds.filter((e) =>
+        require(`./config/${e.id}.json`)["plugins.disabled"].includes(plugin)
+      )
+    );
+  }
+
+  for (const event of events) {
+    client.on(event.type, (...params) => {
+      if (getEventGuild(...params) !== null) {
+        if (
+          fs
+            .readdirSync("./config/")
+            .filter(
+              (e) =>
+                !require(`./config/${e}`)["plugins.disabled"].includes(
+                  event.from
+                )
+            )
+            .includes(getEventGuild(...params) + ".json")
+        ) {
+          event.exec(...params);
+        }
+      }
+    });
+  }
 });
-for (const runScript of scripts) {
-  runScript();
-}
+
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.type === interaction.isChatInputCommand()) return;
 
@@ -322,10 +357,6 @@ client.on("interactionCreate", async (interaction) => {
     } else return;
   });
 });
-
-for (const event of events) {
-  client.on(event.type, event.exec);
-}
 
 process.chdir(__dirname);
 
@@ -337,4 +368,3 @@ process.on("SIGINT", () => {
 });
 
 client.login(TOKEN);
-
