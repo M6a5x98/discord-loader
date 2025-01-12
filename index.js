@@ -149,20 +149,18 @@ client.on("ready", async (cl) => {
         )
           return;
         else {
-          for (const type of file.type) {
+          for (let i = 0; i < file.type.length; i++) {
             //#region load_/_commands
             if (type === "command") {
               if (
-                !fs.existsSync(
-                  path.join("plugins", file.name, file.main["command"])
-                )
+                !fs.existsSync(path.join("commands", file.name, file.main[i]))
               )
                 continue;
               const file2 = require(path.join(
                 __dirname,
-                "plugins",
+                "commands",
                 file.name,
-                file.main["command"]
+                file.main[i]
               ));
               const scope = fs
                 .readdirSync("config/")
@@ -190,21 +188,19 @@ client.on("ready", async (cl) => {
             } else if (type === "event") {
               //#region load_events
               if (
-                !fs.existsSync(
-                  path.join("plugins", file.name, file.main["event"])
-                )
+                !fs.existsSync(path.join("commands", file.name, file.main[i]))
               )
                 continue;
               const file2 = require(path.join(
                 __dirname,
-                "plugins",
+                "commands",
                 file.name,
-                file.main["event"]
+                file.main[i]
               ));
               events.push({ ...file2, from: file.name });
               console.log(
                 "Loading one event :\x1b[31;1m",
-                file.main["event"],
+                file.main[i],
                 "\x1b[0m"
               );
               continue;
@@ -212,21 +208,19 @@ client.on("ready", async (cl) => {
             } else if (type === "script") {
               //#region load_scripts
               if (
-                !fs.existsSync(
-                  path.join("plugins", file.name, file.main["script"])
-                )
+                !fs.existsSync(path.join("commands", file.name, file.main[i]))
               )
                 continue;
               const file2 = require(path.join(
                 __dirname,
-                "plugins",
+                "commands",
                 file.name,
-                file.main["script"]
+                file.main[i]
               ));
               scripts.push({ runScript: file2, plugin: file.name });
               console.log(
                 "Loading one script :\x1b[31;1m",
-                file.main["script"],
+                file.main[i],
                 "\x1b[0m"
               );
               continue;
