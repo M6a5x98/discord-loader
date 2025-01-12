@@ -1,6 +1,6 @@
 # Config
 
-If you want to disable some plugins in some servers, you can create a config file name `<server_id>.json` and then write inside :
+If you want to disable some plugins in some servers, you can create a config file named `<server_id>.json` and then write inside :
 
 ```json
 {
