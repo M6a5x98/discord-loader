@@ -25,13 +25,15 @@ This loader is based on plugins, modules for your bot. They can :
 
 - Register commands
 - Run scripts when the bot starts
-- Add rvent listeners
-  There are to types of plugins, simple and multi.
-  Simples plugins does just one thing. Multi plugins do many things
+- Add event listeners
+<br />
+There are to types of plugins, simple and multi :
+- Simples plugins does just one thing
+- Multi plugins do many things
 
-## Create plugin
+## Create a plugin
 
-To create a plugin go in the plugin directory and create a directory named the same as your plugin.
+To create a plugin go in the `plugins` directory and create a directory named the same as your plugin.
 Then create a file called `plugin.json` in the folder and put the following content in it :
 
 ```typescript
@@ -42,7 +44,7 @@ Then create a file called `plugin.json` in the folder and put the following cont
 }
 ```
 
-This a file for a Simple plugin, to create a Multi plugin replace the `type` and `main` keys with arrays (`["command", "event","event"]`, `["command.js", "messageCreate.js", "randomEvent.js"]`)
+This a file for a **simple plugin**, to create a **multi plugin** replace the `type` and `main` keys with arrays (`["command", "event","event"]`, `["command.js", "messageCreate.js", "randomEvent.js"]`)
 
 ### Command File
 
@@ -72,7 +74,7 @@ module.exports = {
 
 ### Script File
 
-If you want to create a startip script go in the associated file and write :
+If you want to create a startup script go in the associated file and write :
 
 ```javascript
 module.exports = (
@@ -81,4 +83,14 @@ module.exports = (
 ) => {
   //The code to run when the script is called
 };
+```
+## Limit a plugin to certain servers
+
+As said in `config/README.md`
+> If you want to disable some plugins in some servers, you can create a config file named `<server_id>.json` and then write inside :
+> 
+```json
+{
+  "plugins.disabled": ["plugin_to_disable_1", "plugin_to_disable_2", "..."]
+}
 ```
