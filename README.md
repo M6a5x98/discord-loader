@@ -28,6 +28,7 @@ This loader is based on plugins, modules for your bot. They can :
 - Add event listeners
 <br />
 There are to types of plugins, simple and multi :
+
 - Simples plugins does just one thing
 - Multi plugins do many things
 
